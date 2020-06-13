@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:dist="http://schemas.android.com/apk/distribution"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.musicplayer">
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:targetSandboxVersion="2"
+        android:theme="@style/AppTheme">
+
+
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- App links for http -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="example.android.com"
+                    android:pathPattern="/uamp"
+                    android:scheme="http" />
+            </intent-filter>
+
+            <!-- App links for https -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="example.android.com"
+                    android:pathPattern="/uamp"
+                    android:scheme="https" />
+            </intent-filter>
+        </activity>
+
+        <!--
+        Declare the common MediaBrowserService for use in the mobile app, including
+        with the Android Auto app.
+        -->
+        <service
+            android:name="com.example.musicplayer.media.MusicService"
+            android:enabled="true"
+            android:exported="true"
+            tools:ignore="ExportedService">
+
+            <intent-filter>
+                <action android:name="android.media.browse.MediaBrowserService" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.media.action.MEDIA_PLAY_FROM_SEARCH" />
+            </intent-filter>
+        </service>
+
+    <!--
+         MediaSession, prior to API 21, uses a broadcast receiver to communicate with a
+         media session. It does not have to be this broadcast receiver, but it must
+         handle the action "android.intent.action.MEDIA_BUTTON".
+
+         Additionally, this is used to resume the service from an inactive state upon
+         receiving a media button event (such as "play").
+    -->
+    <receiver android:name="androidx.media.session.MediaButtonReceiver">
+        <intent-filter>
+            <action android:name="android.intent.action.MEDIA_BUTTON" />
+        </intent-filter>
+    </receiver>
+
+    <provider
+        android:name=".media.library.AlbumArtContentProvider"
+        android:authorities="com.example.musicplayer.media.library.provider"
+        android:exported="false" />
+
+    </application>
+</manifest>
