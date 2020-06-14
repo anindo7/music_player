@@ -21,18 +21,6 @@ import java.io.IOException
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 
-/**
- * Validates that the calling package is authorized to browse a [MediaBrowserServiceCompat].
- *
- * The list of allowed signing certificates and their corresponding package names is defined in
- * res/xml/allowed_media_browser_callers.xml.
- *
- * If you want to add a new caller to allowed_media_browser_callers.xml and you don't know
- * its signature, this class will print to logcat (INFO level) a message with the proper
- * xml tags to add to allow the caller.
- *
- * For more information, see res/xml/allowed_media_browser_callers.xml.
- */
 class PackageValidator(context: Context, @XmlRes xmlResId: Int) {
     private val context: Context
     private val packageManager: PackageManager

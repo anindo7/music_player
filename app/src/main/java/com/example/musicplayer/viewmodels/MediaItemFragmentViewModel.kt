@@ -14,15 +14,11 @@ import com.example.musicplayer.media.extensions.isPlaying
 
 class MediaItemFragmentViewModel(
     private val mediaId: String,
-    musicServiceConnection: MusicServiceConnection
-) : ViewModel() {
+    musicServiceConnection: MusicServiceConnection) : ViewModel() {
 
     private val _mediaItems = MutableLiveData<List<MediaItemData>>()
     val mediaItems: LiveData<List<MediaItemData>> = _mediaItems
 
-    /**
-     * Pass the status of the [MusicServiceConnection.networkFailure] through.
-     */
     val networkError = Transformations.map(musicServiceConnection.networkFailure) { it }
 
     private val subscriptionCallback = object : MediaBrowserCompat.SubscriptionCallback() {
@@ -42,11 +38,6 @@ class MediaItemFragmentViewModel(
         }
     }
 
-    /**
-     * When the session's [PlaybackStateCompat] changes, the [mediaItems] need to be updated
-     * so the correct [MediaItemData.playbackRes] is displayed on the active item.
-     * (i.e.: play/pause button or blank)
-     */
     private val playbackStateObserver = Observer<PlaybackStateCompat> {
         val playbackState = it ?: EMPTY_PLAYBACK_STATE
         val metadata = musicServiceConnection.nowPlaying.value ?: NOTHING_PLAYING
@@ -55,12 +46,6 @@ class MediaItemFragmentViewModel(
         }
     }
 
-    /**
-     * When the session's [MediaMetadataCompat] changes, the [mediaItems] need to be updated
-     * as it means the currently active item has changed. As a result, the new, and potentially
-     * old item (if there was one), both need to have their [MediaItemData.playbackRes]
-     * changed. (i.e.: play/pause button or blank)
-     */
     private val mediaMetadataObserver = Observer<MediaMetadataCompat> {
         val playbackState = musicServiceConnection.playbackState.value ?: EMPTY_PLAYBACK_STATE
         val metadata = it ?: NOTHING_PLAYING
@@ -69,23 +54,6 @@ class MediaItemFragmentViewModel(
         }
     }
 
-    /**
-     * Because there's a complex dance between this [ViewModel] and the [MusicServiceConnection]
-     * (which is wrapping a [MediaBrowserCompat] object), the usual guidance of using
-     * [Transformations] doesn't quite work.
-     *
-     * Specifically there's three things that are watched that will cause the single piece of
-     * [LiveData] exposed from this class to be updated.
-     *
-     * [subscriptionCallback] (defined above) is called if/when the children of this
-     * ViewModel's [mediaId] changes.
-     *
-     * [MusicServiceConnection.playbackState] changes state based on the playback state of
-     * the player, which can change the [MediaItemData.playbackRes]s in the list.
-     *
-     * [MusicServiceConnection.nowPlaying] changes based on the item that's being played,
-     * which can also change the [MediaItemData.playbackRes]s in the list.
-     */
     private val musicServiceConnection = musicServiceConnection.also {
         it.subscribe(mediaId, subscriptionCallback)
 
@@ -93,13 +61,6 @@ class MediaItemFragmentViewModel(
         it.nowPlaying.observeForever(mediaMetadataObserver)
     }
 
-    /**
-     * Since we use [LiveData.observeForever] above (in [musicServiceConnection]), we want
-     * to call [LiveData.removeObserver] here to prevent leaking resources when the [ViewModel]
-     * is not longer in use.
-     *
-     * For more details, see the kdoc on [musicServiceConnection] above.
-     */
     override fun onCleared() {
         super.onCleared()
 

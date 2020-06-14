@@ -9,6 +9,7 @@
     <dimen name="media_item_text_margin_start">4dp</dimen>
 
     <dimen name="media_item_art">72dp</dimen>
+    <dimen name="media_item_album_art">96dp</dimen>
 
     <dimen name="media_item_radius">4dp</dimen>
     <dimen name="media_item_half_radius">2dp</dimen>

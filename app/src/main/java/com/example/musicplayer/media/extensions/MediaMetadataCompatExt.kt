@@ -6,7 +6,6 @@ import android.support.v4.media.MediaBrowserCompat.MediaItem
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource
-import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DataSource
 
@@ -100,17 +99,9 @@ inline val MediaMetadataCompat.mediaUri: Uri
 inline val MediaMetadataCompat.downloadStatus
     get() = getLong(MediaMetadataCompat.METADATA_KEY_DOWNLOAD_STATUS)
 
-/**
- * Custom property for storing whether a [MediaMetadataCompat] item represents an
- * item that is [MediaItem.FLAG_BROWSABLE] or [MediaItem.FLAG_PLAYABLE].
- */
 @MediaItem.Flags
 inline val MediaMetadataCompat.flag
     get() = this.getLong(METADATA_KEY_UAMP_FLAGS).toInt()
-
-/**
- * Useful extensions for [MediaMetadataCompat.Builder].
- */
 
 // These do not have getters, so create a message for the error.
 const val NO_GET = "Property does not have a 'get'"
@@ -251,20 +242,11 @@ inline val MediaMetadataCompat.fullDescription
             it.extras?.putAll(bundle)
         }
 
-/**
- * Extension method for building an [ExtractorMediaSource] from a [MediaMetadataCompat] object.
- *
- * For convenience, place the [MediaDescriptionCompat] into the tag so it can be retrieved later.
- */
 fun MediaMetadataCompat.toMediaSource(dataSourceFactory: DataSource.Factory) =
     ProgressiveMediaSource.Factory(dataSourceFactory)
         .setTag(fullDescription)
         .createMediaSource(mediaUri)
 
-/**
- * Extension method for building a [ConcatenatingMediaSource] given a [List]
- * of [MediaMetadataCompat] objects.
- */
 fun List<MediaMetadataCompat>.toMediaSource(
     dataSourceFactory: DataSource.Factory
 ): ConcatenatingMediaSource {
@@ -276,8 +258,4 @@ fun List<MediaMetadataCompat>.toMediaSource(
     return concatenatingMediaSource
 }
 
-/**
- * Custom property that holds whether an item is [MediaItem.FLAG_BROWSABLE] or
- * [MediaItem.FLAG_PLAYABLE].
- */
 const val METADATA_KEY_UAMP_FLAGS = "com.example.android.uamp.media.METADATA_KEY_UAMP_FLAGS"

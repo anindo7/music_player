@@ -21,20 +21,8 @@ import com.example.musicplayer.media.extensions.title
  */
 interface MusicSource : Iterable<MediaMetadataCompat> {
 
-    /**
-     * Begins loading the data for this music source.
-     */
     suspend fun load()
-
-    /**
-     * Method which will perform a given action after this [MusicSource] is ready to be used.
-     *
-     * @param performAction A lambda expression to be called with a boolean parameter when
-     * the source is ready. `true` indicates the source was successfully prepared, `false`
-     * indicates an error occurred.
-     */
     fun whenReady(performAction: (Boolean) -> Unit): Boolean
-
     fun search(query: String, extras: Bundle): List<MediaMetadataCompat>
 }
 
@@ -47,29 +35,14 @@ interface MusicSource : Iterable<MediaMetadataCompat> {
 @Retention(AnnotationRetention.SOURCE)
 annotation class State
 
-/**
- * State indicating the source was created, but no initialization has performed.
- */
 const val STATE_CREATED = 1
 
-/**
- * State indicating initialization of the source is in progress.
- */
 const val STATE_INITIALIZING = 2
 
-/**
- * State indicating the source has been initialized and is ready to be used.
- */
 const val STATE_INITIALIZED = 3
 
-/**
- * State indicating an error has occurred.
- */
 const val STATE_ERROR = 4
 
-/**
- * Base class for music sources in UAMP.
- */
 abstract class AbstractMusicSource : MusicSource {
     @State
     var state: Int = STATE_CREATED
@@ -88,12 +61,6 @@ abstract class AbstractMusicSource : MusicSource {
 
     private val onReadyListeners = mutableListOf<(Boolean) -> Unit>()
 
-    /**
-     * Performs an action when this MusicSource is ready.
-     *
-     * This method is *not* threadsafe. Ensure actions and state changes are only performed
-     * on a single thread.
-     */
     override fun whenReady(performAction: (Boolean) -> Unit): Boolean =
         when (state) {
             STATE_CREATED, STATE_INITIALIZING -> {
@@ -106,10 +73,6 @@ abstract class AbstractMusicSource : MusicSource {
             }
         }
 
-    /**
-     * Handles searching a [MusicSource] from a focused voice search, often coming
-     * from the Google Assistant.
-     */
     override fun search(query: String, extras: Bundle): List<MediaMetadataCompat> {
         // First attempt to search with the "focus" that's provided in the extras.
         val focusSearchResult = when (extras[MediaStore.EXTRA_MEDIA_FOCUS]) {

@@ -1,23 +1,18 @@
 package com.example.musicplayer.media
 
 import android.app.PendingIntent
-import android.content.ContentUris
 import android.content.Context
-import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import android.provider.MediaStore
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
-import android.util.Log
 import com.example.musicplayer.R
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import kotlinx.coroutines.*
 import java.io.FileNotFoundException
-import java.io.InputStream
 
 
 const val NOW_PLAYING_CHANNEL = "com.example.musicplayer.media.NOW_PLAYING"
@@ -93,8 +88,7 @@ class UampNotificationManager(
                 currentIconUri = iconUri
                 serviceScope.launch {
                     currentBitmap = iconUri?.let {
-                        // resolveUriAsBitmap(it)
-                        getAlbumArt(it)
+                        resolveUriAsBitmap(it)
                     }
                     callback?.onBitmap(currentBitmap)
                 }
@@ -106,43 +100,17 @@ class UampNotificationManager(
 
         private suspend fun resolveUriAsBitmap(uri: Uri): Bitmap? {
             return withContext(Dispatchers.IO) {
+                val mUri= Uri.parse("android.resource://com.example.musicplayer/drawable/ic_album")
+
                 val parcelFileDescriptor =
                     context.contentResolver.openFileDescriptor(uri, MODE_READ_ONLY)
-                        ?: return@withContext null
-                val fileDescriptor = parcelFileDescriptor.fileDescriptor
+                        ?: context.contentResolver.openFileDescriptor(mUri, MODE_READ_ONLY)
+                val fileDescriptor = parcelFileDescriptor?.fileDescriptor
                 BitmapFactory.decodeFileDescriptor(fileDescriptor).apply {
-                    parcelFileDescriptor.close()
+                    parcelFileDescriptor?.close()
                 }
-            }
-        }
 
-        private suspend fun getAlbumArt(uri: Uri): Bitmap? {
-            var songCoverArt: Bitmap? = null
-            val projections = arrayOf(MediaStore.Audio.Media.ALBUM_ID)
-            var cursor: Cursor? = null
-            try {
-                 cursor = context.contentResolver.query(uri, projections, null, null, null)
-                if( cursor != null) {
-                    //// val column_index: Int = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
-                    val album_id = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Albums._ID))
-                    cursor.moveToFirst()
-                    val songCover = Uri.parse("content://media/external/audio/albumart")
-                    val uriSongCover = ContentUris.withAppendedId(songCover, album_id)
-                    val res = context.contentResolver
-                    try {
-                        val `in`: InputStream? = res.openInputStream(uriSongCover)
-                        songCoverArt = BitmapFactory.decodeStream(`in`)
-                    } catch (e: FileNotFoundException) {
-                        Log.e("Error", "Error: " + e.message)
-                    }
-                }
-            } finally {
-                if (cursor != null) {
-                    cursor.close()
-                }
             }
-
-            return songCoverArt
         }
     }
 }

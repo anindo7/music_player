@@ -53,14 +53,13 @@ class NowPlayingFragment : Fragment() {
                 .get(NowPlayingFragmentViewModel::class.java)
 
         // Attach observers to the LiveData coming from this ViewModel
-        nowPlayingViewModel.mediaMetadata.observe(this,
-            Observer { mediaItem -> updateUI(view, mediaItem) })
-        nowPlayingViewModel.mediaButtonRes.observe(this,
-            Observer { res ->
+        nowPlayingViewModel.mediaMetadata.observe(this, Observer { mediaItem -> updateUI(view, mediaItem) })
+
+        nowPlayingViewModel.mediaButtonRes.observe(this, Observer { res ->
                 view.findViewById<ImageView>(R.id.media_button).setImageResource(res)
             })
-        nowPlayingViewModel.mediaPosition.observe(this,
-            Observer { pos ->
+
+        nowPlayingViewModel.mediaPosition.observe(this, Observer { pos ->
                 positionTextView.text =
                     NowPlayingFragmentViewModel.NowPlayingMetadata.timestampToMSS(context, pos)
             })
@@ -89,6 +88,8 @@ class NowPlayingFragment : Fragment() {
         } else {
             Glide.with(view)
                 .load(metadata.albumArtUri)
+                .error(R.drawable.ic_album)
+                .placeholder(R.drawable.ic_album)
                 .into(albumArtView)
         }
         view.findViewById<TextView>(R.id.title).text = metadata.title

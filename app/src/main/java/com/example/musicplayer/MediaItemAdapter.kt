@@ -1,5 +1,6 @@
 package com.example.musicplayer
 
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,12 +9,11 @@ import android.widget.TextView
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestListener
 import com.example.musicplayer.MediaItemData.Companion.PLAYBACK_RES_CHANGED
 import kotlinx.android.synthetic.main.fragment_media_item.view.*
+import java.io.FileNotFoundException
 
-/**
- * [RecyclerView.Adapter] of [MediaItemData]s used by the [MediaItemFragment].
- */
 class MediaItemAdapter(
     private val itemClickedListener: (MediaItemData) -> Unit
 ) : ListAdapter<MediaItemData, MediaViewHolder>(MediaItemData.diffCallback) {
@@ -54,9 +54,10 @@ class MediaItemAdapter(
             holder.subtitleView.text = mediaItem.subtitle
             holder.playbackState.setImageResource(mediaItem.playbackRes)
 
-//            Glide.with(holder.albumArt)
-//                .load(mediaItem.albumArtUri)
-//                .into(holder.albumArt)
+            Glide.with(holder.albumArt)
+                .load(mediaItem.albumArtUri)
+                .placeholder(R.drawable.ic_album)
+                .into(holder.albumArt)
         }
     }
 

@@ -10,11 +10,10 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.util.Log
-import com.example.musicplayer.R
+
 import com.example.musicplayer.media.extensions.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.util.concurrent.TimeUnit
 
 class FileSource(val context: Context) :  AbstractMusicSource(){
     private var catalog: List<MediaMetadataCompat> = emptyList()
@@ -40,18 +39,8 @@ class FileSource(val context: Context) :  AbstractMusicSource(){
             }
 
             musicCat.music.map { song ->
-                // Block on downloading artwork.
-
-
-                // Expose file via Local URI
-                val artUri = Uri.parse("android.resource://com.example.musicplayer/drawable/ic_album.xml")
-
                 android.support.v4.media.MediaMetadataCompat.Builder()
                     .from(song)
-                    .apply {
-                        displayIconUri = artUri.toString() // Used by ExoPlayer and Notification
-                        albumArtUri = artUri.toString()
-                    }
                     .build()
             }.toList()
         }
@@ -68,11 +57,13 @@ class FileSource(val context: Context) :  AbstractMusicSource(){
             MediaStore.Audio.Media.ARTIST,
             MediaStore.Audio.Media.TITLE,
             MediaStore.Audio.Media.ALBUM,
-            // MediaStore.Audio.Media.DISPLAY_NAME,
-            MediaStore.Audio.Media.DURATION
+            MediaStore.Audio.Media.ALBUM_ID,
+            MediaStore.Audio.Media.DURATION,
+            MediaStore.Audio.Media.YEAR,
+            MediaStore.Audio.Media.TRACK
         )
 
-        val musicResolver: ContentResolver = context.getContentResolver()
+        val musicResolver: ContentResolver = context.contentResolver
         val musicUri: Uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         val musicCursor: Cursor? = musicResolver.query(musicUri, projection, selection, null, null)
 
@@ -82,10 +73,17 @@ class FileSource(val context: Context) :  AbstractMusicSource(){
             val contentUri: Uri = ContentUris.withAppendedId(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id)
             val title = musicCursor.getString(2)
-            val duration = musicCursor.getLong(4)
-            // val displayName = musicCursor.getString(4)
-            val album = musicCursor.getString(3)
-            ob.music.add(FileMusic(id.toString(),title,album,artist,contentUri.toString(),duration))
+            val duration = musicCursor.getLong(5)
+            val album_id = musicCursor.getLong(4)
+            val album = musicCursor.getString(3) ?: "Unknown"
+            val year = musicCursor.getString(6) ?: "--"
+            val track = musicCursor.getString(7)
+
+            val artworkUri = Uri.parse("content://media/external/audio/albumart")
+            val image: Uri = ContentUris.withAppendedId(artworkUri,album_id)
+            Log.i("Songs", "$artworkUri||$year||$artist")
+
+            ob.music.add(FileMusic(id.toString(),title,album,artist,contentUri.toString(),duration,image.toString(),year))
         }
 
         Log.i("Songs", ob.music.size.toString())
@@ -96,8 +94,6 @@ class FileSource(val context: Context) :  AbstractMusicSource(){
 
 
 fun MediaMetadataCompat.Builder.from(fileMusic: FileMusic): MediaMetadataCompat.Builder {
-    // The duration from the JSON is given in seconds, but the rest of the code works in
-    // milliseconds. Here's where we convert to the proper units.
     // val durationMs = TimeUnit.SECONDS.toMillis(fileMusic.duration)
 
     id = fileMusic.id
@@ -140,6 +136,7 @@ data class FileMusic (
     var source: String = "",
     var duration: Long = -1,
     var image: String = "",
+    var year: String = "",
     var trackNumber: Long = 0,
     var totalTrackCount: Long = 0,
     var site: String = "",

@@ -3,8 +3,10 @@ package com.example.musicplayer
 import android.Manifest
 import android.content.pm.PackageManager
 import android.media.AudioManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.view.Window
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
@@ -43,10 +45,6 @@ class MainActivity : AppCompatActivity() {
         viewModel = ViewModelProvider(this, InjectorUtils.provideMainActivityViewModel(this))
             .get(MainActivityViewModel::class.java)
 
-        /**
-         * Observe [MainActivityViewModel.navigateToFragment] for [Event]s that request a
-         * fragment swap.
-         */
         viewModel.eventNavigateToFragment.observe(this, Observer {
             it?.getContentIfNotHandled()?.let { fragmentRequest ->
                 val transaction = supportFragmentManager.beginTransaction()
@@ -58,24 +56,15 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        /**
-         * Observe changes to the [MainActivityViewModel.rootMediaId]. When the app starts,
-         * and the UI connects to [MusicService], this will be updated and the app will show
-         * the initial list of media items.
-         */
         viewModel.rootMediaId.observe(this, Observer { rootMediaId ->
             if (rootMediaId != null) {
-                navigateToMediaItem(rootMediaId)
+                navigateToMediaItem(rootMediaId,"Music Player", Uri.EMPTY)
             }
         })
 
-        /**
-         * Observe [MainActivityViewModel.navigateToMediaItem] for [Event]s indicating
-         * the user has requested to browse to a different [MediaItemData].
-         */
         viewModel.eventNavigateToMediaItem.observe(this, Observer {
-            it?.getContentIfNotHandled()?.let { mediaId ->
-                navigateToMediaItem(mediaId)
+            it?.getContentIfNotHandled()?.let { media ->
+                navigateToMediaItem(media.mediaId, media.title, media.albumArtUri)
             }
         })
     }
@@ -101,11 +90,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        //super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        // super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
         var allowed = true
 
@@ -132,10 +118,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun navigateToMediaItem(mediaId: String) {
+    private fun navigateToMediaItem(mediaId: String,root: String, rootUri: Uri) {
         var fragment: MediaItemFragment? = getBrowseFragment(mediaId)
         if (fragment == null) {
-            fragment = MediaItemFragment.newInstance(mediaId)
+            fragment = MediaItemFragment.newInstance(mediaId,root,rootUri)
             // If this is not the top level media (root), we add it to the fragment
             // back stack, so that actionbar toggle and Back will work appropriately:
             viewModel.showFragment(fragment, !isRootId(mediaId), mediaId)

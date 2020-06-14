@@ -23,8 +23,8 @@ class MainActivityViewModel(private val musicServiceConnection: MusicServiceConn
             }
         }
 
-    private val _eventNavigateToMediaItem = MutableLiveData<Event<String>>()
-    val eventNavigateToMediaItem: LiveData<Event<String>> = _eventNavigateToMediaItem
+    private val _eventNavigateToMediaItem = MutableLiveData<Event<MediaItemData>>()
+    val eventNavigateToMediaItem: LiveData<Event<MediaItemData>> = _eventNavigateToMediaItem
 
     private val _eventNavigateToFragment = MutableLiveData<Event<FragmentNavigationRequest>>()
     val eventNavigateToFragment: LiveData<Event<FragmentNavigationRequest>> = _eventNavigateToFragment
@@ -38,25 +38,12 @@ class MainActivityViewModel(private val musicServiceConnection: MusicServiceConn
         }
     }
 
-
-    /**
-     * Convenience method used to swap the fragment shown in the main activity
-     *
-     * @param fragment the fragment to show
-     * @param backStack if true, add this transaction to the back stack
-     * @param tag the name to use for this fragment in the stack
-     */
     fun showFragment(fragment: Fragment, backStack: Boolean = true, tag: String? = null) {
         _eventNavigateToFragment.value = Event(FragmentNavigationRequest(fragment, backStack, tag))
     }
 
-
-    /**
-     * This posts a browse [Event] that will be handled by the
-     * observer in [MainActivity].
-     */
     private fun browseToItem(mediaItem: MediaItemData) {
-        _eventNavigateToMediaItem.value = Event(mediaItem.mediaId)
+        _eventNavigateToMediaItem.value = Event(mediaItem)
     }
 
     fun playMedia(mediaItem: MediaItemData, pauseAllowed: Boolean = true) {

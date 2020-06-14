@@ -6,14 +6,19 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="TextAppearance.Uamp.Title" parent="@style/TextAppearance.AppCompat.Title">
-        <item name="android:textColor">?android:textColorSecondary</item>
+    <style name="TextAppearance.Uamp.Album" parent="@style/TextAppearance.AppCompat.Title">
+        <item name="android:textColor">#6A6AC1</item>
+    </style>
+
+    <style name="TextAppearance.Uamp.Title" parent="@style/TextAppearance.AppCompat.Medium">
+        <item name="android:textColor">#6A6AC1</item>
     </style>
 
     <style name="TextAppearance.Uamp.Subtitle" parent="@style/TextAppearance.AppCompat.Small">
-        <item name="android:textColor">?android:textColorSecondary</item>
+        <item name="android:textColor">@color/textColor</item>
     </style>
 
     <style name="MediaStateIcon">

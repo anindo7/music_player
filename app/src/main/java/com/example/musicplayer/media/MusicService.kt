@@ -36,18 +36,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
-
-/**
- * This class is the entry point for browsing and playback commands from the APP's UI
- * and other apps that wish to play music via UAMP (for example, Android Auto or
- * the Google Assistant).
- *
- * Browsing begins with the method [MusicService.onGetRoot], and continues in
- * the callback [MusicService.onLoadChildren].
- *
- * For more information on implementing a MediaBrowserService,
- * visit [https://developer.android.com/guide/topics/media-apps/audio-app/building-a-mediabrowserservice.html](https://developer.android.com/guide/topics/media-apps/audio-app/building-a-mediabrowserservice.html).
- */
 open class MusicService : MediaBrowserServiceCompat() {
     private lateinit var becomingNoisyReceiver: BecomingNoisyReceiver
     private lateinit var notificationManager: UampNotificationManager
@@ -60,21 +48,15 @@ open class MusicService : MediaBrowserServiceCompat() {
     protected lateinit var mediaSession: MediaSessionCompat
     protected lateinit var mediaSessionConnector: MediaSessionConnector
 
-    /**
-     * This must be `by lazy` because the source won't initially be ready.
-     * See [MusicService.onLoadChildren] to see where it's accessed (and first
-     * constructed).
-     */
     private val browseTree: BrowseTree by lazy {
         BrowseTree(applicationContext, mediaSource)
     }
 
     private var isForegroundService = false
 
-    private val remoteJsonSource: Uri =
-        Uri.parse("https://storage.googleapis.com/uamp/catalog.json")
+    // private val remoteJsonSource: Uri = Uri.parse("https://storage.googleapis.com/uamp/catalog.json")
 
-    private val uAmpAudioAttributes = AudioAttributes.Builder()
+    private val mAudioAttributes = AudioAttributes.Builder()
         .setContentType(C.CONTENT_TYPE_MUSIC)
         .setUsage(C.USAGE_MEDIA)
         .build()
@@ -87,7 +69,7 @@ open class MusicService : MediaBrowserServiceCompat() {
      */
     private val exoPlayer: ExoPlayer by lazy {
         ExoPlayerFactory.newSimpleInstance(this).apply {
-            setAudioAttributes(uAmpAudioAttributes, true)
+            setAudioAttributes(mAudioAttributes, true)
             addListener(playerListener)
         }
     }
@@ -109,23 +91,8 @@ open class MusicService : MediaBrowserServiceCompat() {
                 isActive = true
             }
 
-        /**
-         * In order for [MediaBrowserCompat.ConnectionCallback.onConnected] to be called,
-         * a [MediaSessionCompat.Token] needs to be set on the [MediaBrowserServiceCompat].
-         *
-         * It is possible to wait to set the session token, if required for a specific use-case.
-         * However, the token *must* be set by the time [MediaBrowserServiceCompat.onGetRoot]
-         * returns, or the connection will fail silently. (The system will not even call
-         * [MediaBrowserCompat.ConnectionCallback.onConnectionFailed].)
-         */
         sessionToken = mediaSession.sessionToken
 
-        /**
-         * The notification manager will use our player and media session to decide when to post
-         * notifications. When notifications are posted or removed our listener will be called, this
-         * allows us to promote the service to foreground (required so that we're not killed if
-         * the main UI is not visible).
-         */
         notificationManager = UampNotificationManager(
             this,
             exoPlayer,
@@ -136,8 +103,6 @@ open class MusicService : MediaBrowserServiceCompat() {
         becomingNoisyReceiver =
             BecomingNoisyReceiver(context = this, sessionToken = mediaSession.sessionToken)
 
-        // The media library is built from a remote JSON file. We'll create the source here,
-        // and then use a suspend function to perform the download off the main thread.
         //// mediaSource = JsonSource(context = this, source = remoteJsonSource)
         mediaSource = FileSource(this)
         serviceScope.launch {
@@ -166,22 +131,8 @@ open class MusicService : MediaBrowserServiceCompat() {
         packageValidator = PackageValidator(this, R.xml.allowed_media_browser_callers)
     }
 
-    /**
-     * This is the code that causes UAMP to stop playing when swiping the activity away from
-     * recents. The choice to do this is app specific. Some apps stop playback, while others allow
-     * playback to continue and allow users to stop it with the notification.
-     */
     override fun onTaskRemoved(rootIntent: Intent) {
         super.onTaskRemoved(rootIntent)
-
-        /**
-         * By stopping playback, the player will transition to [Player.STATE_IDLE] triggering
-         * [Player.EventListener.onPlayerStateChanged] to be called. This will cause the
-         * notification to be hidden and trigger
-         * [PlayerNotificationManager.NotificationListener.onNotificationCancelled] to be called.
-         * The service will then remove itself as a foreground service, and will call
-         * [stopSelf].
-         */
         exoPlayer.stop(true)
     }
 
@@ -199,10 +150,6 @@ open class MusicService : MediaBrowserServiceCompat() {
         exoPlayer.release()
     }
 
-    /**
-     * Returns the "root" media ID that the client should request to get the list of
-     * [MediaItem]s to browse/play.
-     */
     override fun onGetRoot(
         clientPackageName: String,
         clientUid: Int,
@@ -228,24 +175,10 @@ open class MusicService : MediaBrowserServiceCompat() {
             // The caller is allowed to browse, so return the root.
             BrowserRoot(BROWSABLE_ROOT, rootExtras)
         } else {
-            /**
-             * Unknown caller. There are two main ways to handle this:
-             * 1) Return a root without any content, which still allows the connecting client
-             * to issue commands.
-             * 2) Return `null`, which will cause the system to disconnect the app.
-             *
-             * UAMP takes the first approach for a variety of reasons, but both are valid
-             * options.
-             */
             BrowserRoot(UAMP_EMPTY_ROOT, rootExtras)
         }
     }
 
-    /**
-     * Returns (via the [result] parameter) a list of [MediaItem]s that are child
-     * items of the provided [parentMediaId]. See [BrowseTree] for more details on
-     * how this is build/more details about the relationships.
-     */
     override fun onLoadChildren(
         parentMediaId: String,
         result: Result<List<MediaItem>>
@@ -264,20 +197,11 @@ open class MusicService : MediaBrowserServiceCompat() {
             }
         }
 
-        // If the results are not ready, the service must "detach" the results before
-        // the method returns. After the source is ready, the lambda above will run,
-        // and the caller will be notified that the results are ready.
-        //
-        // See [MediaItemFragmentViewModel.subscriptionCallback] for how this is passed to the
-        // UI/displayed in the [RecyclerView].
         if (!resultsSent) {
             result.detach()
         }
     }
 
-    /**
-     * Returns a list of [MediaItem]s that match the given search query
-     */
     override fun onSearch(
         query: String,
         extras: Bundle?,
@@ -299,9 +223,6 @@ open class MusicService : MediaBrowserServiceCompat() {
         }
     }
 
-    /**
-     * Listen for notification events.
-     */
     private inner class PlayerNotificationListener :
         PlayerNotificationManager.NotificationListener {
         override fun onNotificationPosted(
@@ -402,12 +323,7 @@ private class BecomingNoisyReceiver(
     }
 }
 
-/*
- * (Media) Session events
- */
 const val NETWORK_FAILURE = "com.example.musicplayer.media.session.NETWORK_FAILURE"
-
-/** Content styling constants */
 private const val CONTENT_STYLE_BROWSABLE_HINT = "android.media.browse.CONTENT_STYLE_BROWSABLE_HINT"
 private const val CONTENT_STYLE_PLAYABLE_HINT = "android.media.browse.CONTENT_STYLE_PLAYABLE_HINT"
 private const val CONTENT_STYLE_SUPPORTED = "android.media.browse.CONTENT_STYLE_SUPPORTED"

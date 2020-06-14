@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_margin="2dp"
+    android:background="@color/colorPrimaryDark">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list"
@@ -12,6 +14,10 @@
         style="@style/MediaItemList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="256dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         tools:context="com.example.android.musicplayer.fragments.MediaItemFragment"
         tools:listitem="@layout/fragment_media_item" />
 
@@ -19,16 +25,45 @@
         android:id="@+id/loadingSpinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center" />
+        android:layout_gravity="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/networkError"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_gravity="center"
+        android:contentDescription="Network Error Occured"
         android:tint="@color/colorAccent"
         android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/list"
+        app:layout_constraintStart_toStartOf="@+id/list"
+        app:layout_constraintTop_toTopOf="@+id/list"
         app:srcCompat="@drawable/ic_signal_wifi_off_black_24dp" />
 
-</FrameLayout>
+    <ImageView
+        android:id="@+id/rootAlbumArt"
+        android:layout_width="@dimen/media_item_album_art"
+        android:layout_height="@dimen/media_item_album_art"
+        android:layout_marginTop="32dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_album_black_24dp" />
 
+    <TextView
+        android:id="@+id/rootAlbum"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:textAppearance="@style/TextAppearance.Uamp.Album"
+        app:layout_constraintBottom_toTopOf="@+id/list"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rootAlbumArt" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
