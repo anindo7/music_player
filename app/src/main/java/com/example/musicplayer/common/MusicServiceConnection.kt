@@ -11,8 +11,6 @@ import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.lifecycle.MutableLiveData
-import androidx.media.MediaBrowserServiceCompat
-import com.example.musicplayer.common.MusicServiceConnection.MediaBrowserConnectionCallback
 import com.example.musicplayer.media.NETWORK_FAILURE
 import com.example.musicplayer.media.extensions.id
 

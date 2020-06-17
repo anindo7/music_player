@@ -81,7 +81,7 @@ class FileSource(val context: Context) :  AbstractMusicSource(){
 
             val artworkUri = Uri.parse("content://media/external/audio/albumart")
             val image: Uri = ContentUris.withAppendedId(artworkUri,album_id)
-            Log.i("Songs", "$artworkUri||$year||$artist")
+            ///Log.i("Songs", "$artworkUri||$year||$artist")
 
             ob.music.add(FileMusic(id.toString(),title,album,artist,contentUri.toString(),duration,image.toString(),year))
         }

@@ -1,5 +1,6 @@
 package com.example.musicplayer.media
 
+import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.os.ResultReceiver
@@ -10,11 +11,13 @@ import android.util.Log
 import com.example.musicplayer.media.extensions.*
 import com.example.musicplayer.media.library.AbstractMusicSource
 import com.example.musicplayer.media.library.MusicSource
+import com.example.musicplayer.utils.SharedPreference
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.upstream.DataSource
 
 class UampPlaybackPreparer(
+    val context: Context,
     private val musicSource: MusicSource,
     private val exoPlayer: ExoPlayer,
     private val dataSourceFactory: DataSource.Factory
@@ -70,8 +73,9 @@ class UampPlaybackPreparer(
         cb: ResultReceiver?
     ) = false
 
-    private fun buildPlaylist(item: MediaMetadataCompat): List<MediaMetadataCompat> =
-        musicSource.filter { it.album == item.album }.sortedBy { it.title }
+    private fun buildPlaylist(item: MediaMetadataCompat): List<MediaMetadataCompat> {
+        return musicSource.filter { it.album == item.album }.sortedBy { it.title }
+    }
 }
 
 private const val TAG = "MediaSessionHelper"

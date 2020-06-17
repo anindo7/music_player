@@ -7,9 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.media.AudioManager
-import android.net.Uri
 import android.os.Bundle
-import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaBrowserCompat.MediaItem
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.session.MediaControllerCompat
@@ -63,10 +61,6 @@ open class MusicService : MediaBrowserServiceCompat() {
 
     private val playerListener = PlayerEventListener()
 
-    /**
-     * Configure ExoPlayer to handle audio focus for us.
-     * See [Player.AudioComponent.setAudioAttributes] for details.
-     */
     private val exoPlayer: ExoPlayer by lazy {
         ExoPlayerFactory.newSimpleInstance(this).apply {
             setAudioAttributes(mAudioAttributes, true)
@@ -118,6 +112,7 @@ open class MusicService : MediaBrowserServiceCompat() {
 
             // Create the PlaybackPreparer of the media session connector.
             val playbackPreparer = UampPlaybackPreparer(
+                this,
                 mediaSource,
                 exoPlayer,
                 dataSourceFactory
@@ -331,4 +326,3 @@ private const val CONTENT_STYLE_LIST = 1
 private const val CONTENT_STYLE_GRID = 2
 
 private const val UAMP_USER_AGENT = "uamp.next"
-private const val TAG = "MusicService"

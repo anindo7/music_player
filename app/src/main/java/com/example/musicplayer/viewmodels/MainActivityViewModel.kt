@@ -1,5 +1,6 @@
 package com.example.musicplayer.viewmodels
 
+import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
@@ -11,6 +12,7 @@ import com.example.musicplayer.media.extensions.isPlayEnabled
 import com.example.musicplayer.media.extensions.isPlaying
 import com.example.musicplayer.media.extensions.isPrepared
 import com.example.musicplayer.utils.Event
+import com.google.android.exoplayer2.audio.AudioFocusManager
 
 class MainActivityViewModel(private val musicServiceConnection: MusicServiceConnection) : ViewModel() {
 
@@ -90,6 +92,41 @@ class MainActivityViewModel(private val musicServiceConnection: MusicServiceConn
             }
         } else {
             transportControls.playFromMediaId(mediaId, null)
+        }
+    }
+
+    fun skipNext(){
+        val transportControls = musicServiceConnection.transportControls
+
+        val isPrepared = musicServiceConnection.playbackState.value?.isPrepared ?: false
+        if(isPrepared){
+            transportControls.skipToNext()
+        }
+    }
+
+    fun skipPrevious(){
+        val transportControls = musicServiceConnection.transportControls
+
+        val isPrepared = musicServiceConnection.playbackState.value?.isPrepared ?: false
+        if(isPrepared){
+            transportControls.skipToPrevious()
+        }
+    }
+
+    fun setRepeat(value : String){
+        val transportControls = musicServiceConnection.transportControls
+        when(value){
+            "all" -> transportControls.setRepeatMode(PlaybackStateCompat.REPEAT_MODE_ALL)
+            "one" -> transportControls.setRepeatMode(PlaybackStateCompat.REPEAT_MODE_ONE)
+            else -> transportControls.setRepeatMode(PlaybackStateCompat.REPEAT_MODE_NONE)
+        }
+    }
+
+    fun setShuffle(value: Boolean){
+        val transportControls = musicServiceConnection.transportControls
+        when(value){
+            true -> transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_ALL)
+            else -> transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE)
         }
     }
 

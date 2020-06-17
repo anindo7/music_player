@@ -12,16 +12,11 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import kotlinx.coroutines.*
-import java.io.FileNotFoundException
 
 
 const val NOW_PLAYING_CHANNEL = "com.example.musicplayer.media.NOW_PLAYING"
 const val NOW_PLAYING_NOTIFICATION = 0xb339 // Arbitrary number used to identify our notification
 
-/**
- * A wrapper class for ExoPlayer's PlayerNotificationManager. It sets up the notification shown to
- * the user during audio playback and provides track metadata, such as track title and icon image.
- */
 class UampNotificationManager(
     private val context: Context,
     private val player: ExoPlayer,
@@ -100,11 +95,10 @@ class UampNotificationManager(
 
         private suspend fun resolveUriAsBitmap(uri: Uri): Bitmap? {
             return withContext(Dispatchers.IO) {
-                val mUri= Uri.parse("android.resource://com.example.musicplayer/drawable/ic_album")
+                val muri= Uri.parse("android.resource://com.example.musicplayer/"+ (R.drawable.ic_album))
 
                 val parcelFileDescriptor =
                     context.contentResolver.openFileDescriptor(uri, MODE_READ_ONLY)
-                        ?: context.contentResolver.openFileDescriptor(mUri, MODE_READ_ONLY)
                 val fileDescriptor = parcelFileDescriptor?.fileDescriptor
                 BitmapFactory.decodeFileDescriptor(fileDescriptor).apply {
                     parcelFileDescriptor?.close()
