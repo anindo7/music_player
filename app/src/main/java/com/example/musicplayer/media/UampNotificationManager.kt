@@ -7,6 +7,12 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
+import android.util.Log
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.example.musicplayer.R
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player
@@ -40,7 +46,7 @@ class UampNotificationManager(
         ).apply {
 
             setMediaSessionToken(sessionToken)
-            setSmallIcon(R.drawable.ic_album_black_24dp)
+            setSmallIcon(R.drawable.ic_album)
 
             // Don't display the rewind or fast-forward buttons.
             setRewindIncrementMs(0)
@@ -95,15 +101,16 @@ class UampNotificationManager(
 
         private suspend fun resolveUriAsBitmap(uri: Uri): Bitmap? {
             return withContext(Dispatchers.IO) {
-                val muri= Uri.parse("android.resource://com.example.musicplayer/"+ (R.drawable.ic_album))
-
-                val parcelFileDescriptor =
-                    context.contentResolver.openFileDescriptor(uri, MODE_READ_ONLY)
-                val fileDescriptor = parcelFileDescriptor?.fileDescriptor
-                BitmapFactory.decodeFileDescriptor(fileDescriptor).apply {
-                    parcelFileDescriptor?.close()
+                try{
+                    val parcelFileDescriptor =
+                        context.contentResolver.openFileDescriptor(uri, MODE_READ_ONLY)
+                    val fileDescriptor = parcelFileDescriptor?.fileDescriptor
+                    BitmapFactory.decodeFileDescriptor(fileDescriptor).apply {
+                        parcelFileDescriptor?.close()
+                    }
+                }catch (e: Exception){
+                    BitmapFactory.decodeResource(context.resources, R.drawable.ic_recommended)
                 }
-
             }
         }
     }

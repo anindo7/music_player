@@ -17,6 +17,7 @@ import com.bumptech.glide.Glide
 import com.example.musicplayer.MediaItemAdapter
 import com.example.musicplayer.R
 import com.example.musicplayer.utils.InjectorUtils
+import com.example.musicplayer.utils.SharedPreference
 import com.example.musicplayer.viewmodels.MainActivityViewModel
 import com.example.musicplayer.viewmodels.MediaItemFragmentViewModel
 import kotlinx.android.synthetic.main.fragment_media_item_list.*
@@ -29,6 +30,10 @@ class MediaItemFragment : Fragment() {
     private lateinit var mediaItemFragmentViewModel: MediaItemFragmentViewModel
 
     private val listAdapter = MediaItemAdapter { clickedItem ->
+        val pref = SharedPreference(this.activity!!.applicationContext)
+        if(clickedItem.title == "Albums" || clickedItem.title == "All Songs" || clickedItem.title == "Artists"){
+            pref.setTag(clickedItem.title)
+        }
         mainActivityViewModel.mediaItemClicked(clickedItem)
     }
 
@@ -95,10 +100,6 @@ class MediaItemFragment : Fragment() {
                 .placeholder(R.drawable.ic_album)
                 .into(image)
         }
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
     }
 }
 

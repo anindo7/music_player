@@ -5,11 +5,9 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.ResultReceiver
 import android.support.v4.media.MediaMetadataCompat
-import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import com.example.musicplayer.media.extensions.*
-import com.example.musicplayer.media.library.AbstractMusicSource
 import com.example.musicplayer.media.library.MusicSource
 import com.example.musicplayer.utils.SharedPreference
 import com.google.android.exoplayer2.*
@@ -74,7 +72,12 @@ class UampPlaybackPreparer(
     ) = false
 
     private fun buildPlaylist(item: MediaMetadataCompat): List<MediaMetadataCompat> {
-        return musicSource.filter { it.album == item.album }.sortedBy { it.title }
+        val pref = SharedPreference(context)
+        return when(pref.getTag()){
+            "Albums" -> musicSource.filter { it.album == item.album }.sortedBy { it.title }
+            "Artists" -> musicSource.filter { it.artist == item.artist }.sortedBy { it.title }
+            else -> musicSource.sortedBy { it.title }
+        }
     }
 }
 

@@ -12,7 +12,6 @@ import com.example.musicplayer.media.extensions.isPlayEnabled
 import com.example.musicplayer.media.extensions.isPlaying
 import com.example.musicplayer.media.extensions.isPrepared
 import com.example.musicplayer.utils.Event
-import com.google.android.exoplayer2.audio.AudioFocusManager
 
 class MainActivityViewModel(private val musicServiceConnection: MusicServiceConnection) : ViewModel() {
 

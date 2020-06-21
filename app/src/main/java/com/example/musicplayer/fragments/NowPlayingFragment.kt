@@ -1,6 +1,5 @@
 package com.example.musicplayer.fragments
 
-import android.annotation.SuppressLint
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
@@ -120,7 +119,6 @@ class NowPlayingFragment : Fragment() {
                 .into(albumArtView)
         }
         seekBar.max = metadata.totalSeconds
-        seekBar.progress = 0
     }
 
     private fun toggleShuffle(view: ImageButton){
@@ -139,9 +137,7 @@ class NowPlayingFragment : Fragment() {
 
     private fun toggleRepeat(view: ImageButton){
         val pref = SharedPreference(this.activity!!.applicationContext)
-        val value = pref.getRepeat()
-        var new = ""
-        new = when(value){
+        val new = when(pref.getRepeat()){
             "all" -> "one"
             "one" -> "none"
             else -> "all"
